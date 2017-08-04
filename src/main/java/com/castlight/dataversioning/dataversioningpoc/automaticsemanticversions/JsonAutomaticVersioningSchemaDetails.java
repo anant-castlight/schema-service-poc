@@ -27,10 +27,10 @@ import java.util.Date;
         @NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION, query = "SELECT jsd FROM JsonSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version")})
 public class JsonAutomaticVersioningSchemaDetails {
 
-    public static final String GET_ID_BY_NAME_VERSION = "getIdByNameVersion";
-    public static final String GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION = "getJsonSchemaDetailsByNameVersion";
-    public static final String GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME = "getAllJsonSchemaDetailsByName";
-    public static final String GET_LATEST_VERSION_BY_NAME = "getLatestVersionByName";
+    public static final String GET_ID_BY_NAME_VERSION = "getAutomaticSchemaetailsIdByNameVersion";
+    public static final String GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION = "getAutomaticJsonSchemaDetailsByNameVersion";
+    public static final String GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME = "getAllAutomaticJsonSchemaDetailsByName";
+    public static final String GET_LATEST_VERSION_BY_NAME = "getAutomaticSchemaetailsLatestVersionByName";
 
     @Id
     @GeneratedValue
@@ -43,7 +43,7 @@ public class JsonAutomaticVersioningSchemaDetails {
     private Date date;
 
     @JsonProperty
-    @Column(nullable = false)
+    @Column(name="name", nullable = false)
     private String name;
 
     @JsonProperty
@@ -60,6 +60,7 @@ public class JsonAutomaticVersioningSchemaDetails {
     private Integer changeNumber;
 
     @JsonProperty
+    @Column(name="version", nullable = false)
     private String version;
 
     public Long getId() {

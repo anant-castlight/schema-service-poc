@@ -26,9 +26,9 @@ import java.util.Date;
         @NamedQuery(name= JsonManualVersioningSchemaDetails.GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION, query = "SELECT jsd FROM JsonSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version")})
 public class JsonManualVersioningSchemaDetails {
 
-    public static final String GET_ID_BY_NAME_VERSION = "getIdByNameVersion";
-    public static final String GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION = "getJsonSchemaDetailsByNameVersion";
-    public static final String GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME = "getAllJsonSchemaDetailsByName";
+    public static final String GET_ID_BY_NAME_VERSION = "getManualSchemaetailsIdByNameVersion";
+    public static final String GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION = "getManualJsonSchemaDetailsByNameVersion";
+    public static final String GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME = "getAutomaticSchemaetailsAllJsonSchemaDetailsByName";
 
     @Id
     @GeneratedValue
@@ -41,7 +41,7 @@ public class JsonManualVersioningSchemaDetails {
     private Date date;
 
     @JsonProperty
-    @Column(nullable = false)
+    @Column(name="name", nullable = false)
     private String name;
 
     @JsonProperty
@@ -58,6 +58,7 @@ public class JsonManualVersioningSchemaDetails {
     private Integer changeNumber;
 
     @JsonProperty
+    @Column(name="version", nullable = false)
     private String version;
 
     public Long getId() {
