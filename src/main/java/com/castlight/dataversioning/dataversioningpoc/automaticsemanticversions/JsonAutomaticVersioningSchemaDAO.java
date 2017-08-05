@@ -2,6 +2,7 @@ package com.castlight.dataversioning.dataversioningpoc.automaticsemanticversions
 
 import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.HibernateUtil;
 import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.JsonUtil;
+import com.castlight.dataversioning.dataversioningpoc.manualsemanticversions.JsonManualVersioningSchemaDetails;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -43,12 +44,12 @@ public class JsonAutomaticVersioningSchemaDAO {
 
         Session session = sessionFactory.openSession();
         session.beginTransaction();
-        JsonAutomaticVersioningSchemaDetails jsonSchemaDetails = get(name, version);
+        Long id = getIdByNameAndVersion(name, session, version);
+        JsonAutomaticVersioningSchemaDetails jsonSchemaDetails = session.load(JsonAutomaticVersioningSchemaDetails.class, id);
         if(JsonUtil.isJsonSchemaChanged(jsonSchemaDetails.getJsonSchema(),jsonSchema )) {
             jsonSchemaDetails.setDate(new Date());
             jsonSchemaDetails.setJsonSchema(jsonSchema);
             jsonSchemaDetails.setDescription(description);
-            jsonSchemaDetails.setVersion(version);
             session.save(jsonSchemaDetails);
             session.getTransaction().commit();
             System.out.println("Updated Successfully");
@@ -88,10 +89,12 @@ public class JsonAutomaticVersioningSchemaDAO {
 
     public String getLatestVersionForSchema(String name) {
         Session session = sessionFactory.openSession();
-        Query query = session.createNamedQuery(JsonAutomaticVersioningSchemaDetails.GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME);
+        Query query = session.createNamedQuery(JsonAutomaticVersioningSchemaDetails.GET_LATEST_VERSION_BY_NAME);
         query.setParameter("name", name);
-        query.setFirstResult(0);
         query.setMaxResults(1);
+        if(query.getResultList().size() == 0) {
+            return new SemanticVersion().toString();
+        }
         return (String)query.getResultList().get(0);
     }
 

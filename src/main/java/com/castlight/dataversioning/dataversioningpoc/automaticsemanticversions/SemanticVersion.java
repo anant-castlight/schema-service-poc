@@ -11,10 +11,14 @@ public class SemanticVersion {
     private int minorVersion;
     private int patchVersion;
 
+    public SemanticVersion(){
+
+    }
+
     public SemanticVersion(String version) {
-        this.majorVersion = Integer.parseInt(version.split(".")[0]);
-        this.minorVersion = Integer.parseInt(version.split(".")[1]);
-        this.patchVersion = Integer.parseInt(version.split(".")[2]);
+        this.majorVersion = Integer.parseInt(version.split("\\.")[0]);
+        this.minorVersion = Integer.parseInt(version.split("\\.")[1]);
+        this.patchVersion = Integer.parseInt(version.split("\\.")[2]);
 
     }
 

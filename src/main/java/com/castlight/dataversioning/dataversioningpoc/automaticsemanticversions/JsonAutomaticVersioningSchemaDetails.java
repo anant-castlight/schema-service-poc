@@ -21,10 +21,10 @@ import java.util.Date;
 @Table(name = "json_automatic_versioning_schema_details", uniqueConstraints = { @UniqueConstraint( columnNames = { "name", "version" } ) })
 @AuditTable(value = "json_automatic_versioning_schema_details_aud")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@NamedQueries({@NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_ID_BY_NAME_VERSION, query = "SELECT jsd.id FROM JsonSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version"),
-        @NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_LATEST_VERSION_BY_NAME, query = "SELECT jsd.version FROM JsonSchemaDetails jsd WHERE jsd.name=:name"),
-        @NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME, query = "SELECT jsd FROM JsonSchemaDetails jsd WHERE jsd.name=:name ORDER BY jsd.id DESC"),
-        @NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION, query = "SELECT jsd FROM JsonSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version")})
+@NamedQueries({@NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_ID_BY_NAME_VERSION, query = "SELECT jsd.id FROM JsonAutomaticVersioningSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version"),
+        @NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_LATEST_VERSION_BY_NAME, query = "SELECT jsd.version FROM JsonAutomaticVersioningSchemaDetails jsd WHERE jsd.name=:name ORDER BY jsd.id DESC"),
+        @NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME, query = "SELECT jsd FROM JsonAutomaticVersioningSchemaDetails jsd WHERE jsd.name=:name ORDER BY jsd.id DESC"),
+        @NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION, query = "SELECT jsd FROM JsonAutomaticVersioningSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version")})
 public class JsonAutomaticVersioningSchemaDetails {
 
     public static final String GET_ID_BY_NAME_VERSION = "getAutomaticSchemaetailsIdByNameVersion";

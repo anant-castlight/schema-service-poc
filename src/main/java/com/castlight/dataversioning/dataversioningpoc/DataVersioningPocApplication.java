@@ -1,6 +1,6 @@
 package com.castlight.dataversioning.dataversioningpoc;
 
-import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.JsonSchemaService;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

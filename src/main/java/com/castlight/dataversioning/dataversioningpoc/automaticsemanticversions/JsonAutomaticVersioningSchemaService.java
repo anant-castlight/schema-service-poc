@@ -50,7 +50,7 @@ public class JsonAutomaticVersioningSchemaService {
         return responseEntity;
     }
 
-    @RequestMapping(value = "/{name_and_version}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{name_and_version:.*}", method = RequestMethod.PUT)
     public ResponseEntity updateJSONSchema(@PathVariable("name_and_version") String nameAndVersion,
                                            @RequestBody String requestJson) {
 
@@ -73,7 +73,7 @@ public class JsonAutomaticVersioningSchemaService {
 
     }
 
-    @RequestMapping(value = "/{name_and_version}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{name_and_version:.*}", method = RequestMethod.GET)
     public ResponseEntity getJSONSchema(@PathVariable("name_and_version") String nameAndVersion) {
 
         JsonAutomaticVersioningSchemaDetails jsonSchemaDetails = null;
@@ -87,7 +87,7 @@ public class JsonAutomaticVersioningSchemaService {
         return responseEntity;
     }
 
-    @RequestMapping(value = "/{name}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{name}/versions", method = RequestMethod.GET)
     public ResponseEntity getAllVersions(@PathVariable("name") String name) {
         ResponseEntity responseEntity = null;
         List<JsonAutomaticVersioningSchemaDetails> jsonSchemaDetailsList = null;
@@ -100,7 +100,7 @@ public class JsonAutomaticVersioningSchemaService {
         return responseEntity;
     }
 
-    @RequestMapping(value = "/{name_and_version}/changes", method = RequestMethod.GET)
+    @RequestMapping(value = "/{name_and_version:.*}/changes", method = RequestMethod.GET)
     public ResponseEntity getAllModificationsOnVersion(@PathVariable("name_and_version") String nameAndVersion) {
         ResponseEntity responseEntity = null;
         List<JsonAutomaticVersioningSchemaDetails> jsonSchemaDetailsList = null;
@@ -120,24 +120,24 @@ public class JsonAutomaticVersioningSchemaService {
             JsonAutomaticVersioningSchemaDetails jsonSchemaDetails = jsonSchemaDAO.get(name, version);
             isDuplicateSchema = !JsonUtil.isJsonSchemaChanged(jsonSchemaDetails.getJsonSchema(), jsonNode.toString());
         } catch (NoResultException nre) {
-            isDuplicateSchema = true;
+            isDuplicateSchema = false;
         }
         return isDuplicateSchema;
     }
 
-    private String generateSemanticVersion(String name, String jsonSchema, String latestVersionFromDb, boolean isPatch) throws ProcessingException {
+    private String generateSemanticVersion(String name, String jsonSchema, String latestVersionFromDb, Boolean isPatch) throws ProcessingException {
 
         SemanticVersion semanticVersion = new SemanticVersion(latestVersionFromDb);
         boolean isSchemaCompatibleWithPreviousVersion = validatePreviousVersionCompatibilityForSchema(name, latestVersionFromDb, jsonSchema);
-        if(isSchemaCompatibleWithPreviousVersion && isPatch) {
+        if(isSchemaCompatibleWithPreviousVersion && (isPatch!=null && isPatch)) {
             semanticVersion.setPatchVersion(semanticVersion.getPatchVersion()+1);
         }
-        else if(isSchemaCompatibleWithPreviousVersion && !isPatch) {
+        else if(isSchemaCompatibleWithPreviousVersion && (isPatch==null || !isPatch)) {
             semanticVersion.setMinorVersion(semanticVersion.getMinorVersion()+1);
             semanticVersion.setPatchVersion(0);
         }
-        else if(!isSchemaCompatibleWithPreviousVersion && !isPatch) {
-            semanticVersion.setMajorVersion(semanticVersion.getMajorVersion());
+        else if(!isSchemaCompatibleWithPreviousVersion && (isPatch==null || !isPatch)) {
+            semanticVersion.setMajorVersion(semanticVersion.getMajorVersion()+1);
             semanticVersion.setMinorVersion(0);
             semanticVersion.setPatchVersion(0);
         }
@@ -149,12 +149,26 @@ public class JsonAutomaticVersioningSchemaService {
 
     private boolean validatePreviousVersionCompatibilityForSchema(String name, String latestVersionFromDb, String jsonSchema) {
 
-        List<String> testJsonList = testJsonObjectDetailsDAO.getAllTestJsonForSchema(jsonSchemaDAO.get(name, latestVersionFromDb).getId());
-        for(String testJsonObject: testJsonList) {
-            //TODO: call json validator method
-            return true;
+        boolean isCompatible = true;
+        try {
+            JsonAutomaticVersioningSchemaDetails jsonAutomaticVersioningSchemaDetails = jsonSchemaDAO.get(name, latestVersionFromDb);
+            if (jsonAutomaticVersioningSchemaDetails != null) {
+                List<String> testJsonList = testJsonObjectDetailsDAO.getAllTestJsonForSchema(jsonAutomaticVersioningSchemaDetails.getId());
+                for (String testJsonObject : testJsonList) {
+                    //TODO: call json validator method
+                    if (true) {
+                        isCompatible = false;
+                        break;
+                    }
+                }
+            } else {
+                isCompatible = false;
+            }
         }
-        return false;
+        catch (NoResultException e) {
+            isCompatible = false;
+        }
+        return isCompatible;
     }
 
 }

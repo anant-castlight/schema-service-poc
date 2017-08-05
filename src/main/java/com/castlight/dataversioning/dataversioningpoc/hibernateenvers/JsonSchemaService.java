@@ -1,5 +1,8 @@
 package com.castlight.dataversioning.dataversioningpoc.hibernateenvers;
 
+import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.JsonSchemaDAO;
+import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.JsonSchemaDetails;
+import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -116,7 +119,7 @@ public class JsonSchemaService {
             JsonSchemaDetails jsonSchemaDetails = jsonSchemaDAO.get(name);
             isDuplicateSchema = !JsonUtil.isJsonSchemaChanged(jsonSchemaDetails.getJsonSchema(), jsonNode.toString());
         } catch (NoResultException nre) {
-            isDuplicateSchema = true;
+            isDuplicateSchema = false;
         }
         return isDuplicateSchema;
     }

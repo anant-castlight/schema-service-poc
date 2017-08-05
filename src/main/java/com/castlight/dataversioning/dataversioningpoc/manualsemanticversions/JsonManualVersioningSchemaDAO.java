@@ -1,6 +1,7 @@
 package com.castlight.dataversioning.dataversioningpoc.manualsemanticversions;
 
 import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.HibernateUtil;
+import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.JsonSchemaDetails;
 import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.JsonUtil;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import org.hibernate.Session;
@@ -43,12 +44,12 @@ public class JsonManualVersioningSchemaDAO {
 
         Session session = sessionFactory.openSession();
         session.beginTransaction();
-        JsonManualVersioningSchemaDetails jsonSchemaDetails = get(name, version);
+        Long id = getIdByNameAndVersion(name, session, version);
+        JsonManualVersioningSchemaDetails jsonSchemaDetails = session.load(JsonManualVersioningSchemaDetails.class, id);
         if(JsonUtil.isJsonSchemaChanged(jsonSchemaDetails.getJsonSchema(),jsonSchema )) {
             jsonSchemaDetails.setDate(new Date());
             jsonSchemaDetails.setJsonSchema(jsonSchema);
             jsonSchemaDetails.setDescription(description);
-            jsonSchemaDetails.setVersion(version);
             session.save(jsonSchemaDetails);
             session.getTransaction().commit();
             System.out.println("Updated Successfully");

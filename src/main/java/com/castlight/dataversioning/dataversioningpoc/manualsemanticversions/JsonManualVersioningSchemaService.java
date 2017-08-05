@@ -29,11 +29,11 @@ public class JsonManualVersioningSchemaService {
         ResponseEntity responseEntity = null;
         try {
             JsonNode node = mapper.readTree(requestJson);
-            String name = mapper.convertValue(node.get("nameAndVersion"), String.class);
+            String nameAndVersion = mapper.convertValue(node.get("nameAndVersion"), String.class);
             JsonNode jsonSchema = mapper.convertValue(node.get("jsonSchema"), JsonNode.class);
             String description = mapper.convertValue(node.get("description"), String.class);
-            if(!isDuplicateSchemaDetailsPresent(name.split("-")[0], name.split("-")[1], jsonSchema)) {
-                jsonSchemaDAO.create(name.split("-")[0], jsonSchema.toString(), description, name.split("-")[1]);
+            if(!isDuplicateSchemaDetailsPresent(nameAndVersion.split("-")[0], nameAndVersion.split("-")[1], jsonSchema)) {
+                jsonSchemaDAO.create(nameAndVersion.split("-")[0], jsonSchema.toString(), description, nameAndVersion.split("-")[1]);
             }
             responseEntity = new ResponseEntity(null, HttpStatus.CREATED);
         }
@@ -46,8 +46,8 @@ public class JsonManualVersioningSchemaService {
         return responseEntity;
     }
 
-    @RequestMapping(value = "/{name_and_version}", method = RequestMethod.PUT)
-    public ResponseEntity updateJSONSchema(@PathVariable("name_and_version") String name,
+    @RequestMapping(value = "/{name_and_version:.*}", method = RequestMethod.PUT)
+    public ResponseEntity updateJSONSchema(@PathVariable("name_and_version") String nameAndVersion,
                                            @RequestBody String requestJson) {
 
         ResponseEntity responseEntity = null;
@@ -55,7 +55,7 @@ public class JsonManualVersioningSchemaService {
             JsonNode node = mapper.readTree(requestJson);
             JsonNode jsonSchema = mapper.convertValue(node.get("jsonSchema"), JsonNode.class);
             String description = mapper.convertValue(node.get("description"), String.class);
-            jsonSchemaDAO.update(name.split("-")[0], jsonSchema.toString(), description, name.split("-")[1]);
+            jsonSchemaDAO.update(nameAndVersion.split("-")[0], jsonSchema.toString(), description, nameAndVersion.split("-")[1]);
             responseEntity = new ResponseEntity(null, HttpStatus.OK);
         } catch (NoResultException nre) {
             responseEntity = new ResponseEntity(nre.getMessage(), HttpStatus.NOT_FOUND);
@@ -69,13 +69,13 @@ public class JsonManualVersioningSchemaService {
 
     }
 
-    @RequestMapping(value = "/{name_and_version}", method = RequestMethod.GET)
-    public ResponseEntity getJSONSchema(@PathVariable("name_and_version") String name) {
+    @RequestMapping(value = "/{name_and_version:.*}", method = RequestMethod.GET)
+    public ResponseEntity getJSONSchema(@PathVariable("name_and_version") String nameAndVersion) {
 
         JsonManualVersioningSchemaDetails jsonSchemaDetails = null;
         ResponseEntity responseEntity = null;
         try {
-            jsonSchemaDetails = jsonSchemaDAO.get(name.split("-")[0], name.split("-")[1]);
+            jsonSchemaDetails = jsonSchemaDAO.get(nameAndVersion.split("-")[0], nameAndVersion.split("-")[1]);
             responseEntity = new ResponseEntity(jsonSchemaDetails, HttpStatus.FOUND);
         } catch (NoResultException nre) {
             responseEntity = new ResponseEntity(nre.getMessage(), HttpStatus.NOT_FOUND);
@@ -83,7 +83,7 @@ public class JsonManualVersioningSchemaService {
         return responseEntity;
     }
 
-    @RequestMapping(value = "/{name}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{name}/versions", method = RequestMethod.GET)
     public ResponseEntity getAllVersions(@PathVariable("name") String name) {
         ResponseEntity responseEntity = null;
         List<JsonManualVersioningSchemaDetails> jsonSchemaDetailsList = null;
@@ -96,12 +96,12 @@ public class JsonManualVersioningSchemaService {
         return responseEntity;
     }
 
-    @RequestMapping(value = "/{name_and_version}/changes", method = RequestMethod.GET)
-    public ResponseEntity getAllModificationsOnVersion(@PathVariable("name_and_version") String name) {
+    @RequestMapping(value = "/{name_and_version:.*}/changes", method = RequestMethod.GET)
+    public ResponseEntity getAllModificationsOnVersion(@PathVariable("name_and_version") String nameAndVersion) {
         ResponseEntity responseEntity = null;
         List<JsonManualVersioningSchemaDetails> jsonSchemaDetailsList = null;
         try {
-            jsonSchemaDetailsList = jsonSchemaDAO.getAllModificationsOnVersion(name.split("-")[0], name.split("-")[1]);
+            jsonSchemaDetailsList = jsonSchemaDAO.getAllModificationsOnVersion(nameAndVersion.split("-")[0], nameAndVersion.split("-")[1]);
             responseEntity = new ResponseEntity(jsonSchemaDetailsList, HttpStatus.OK);
         } catch (NoResultException nre) {
             responseEntity = new ResponseEntity(nre.getMessage(), HttpStatus.NOT_FOUND);
@@ -116,7 +116,7 @@ public class JsonManualVersioningSchemaService {
             JsonManualVersioningSchemaDetails jsonSchemaDetails = jsonSchemaDAO.get(name, version);
             isDuplicateSchema = !JsonUtil.isJsonSchemaChanged(jsonSchemaDetails.getJsonSchema(), jsonNode.toString());
         } catch (NoResultException nre) {
-            isDuplicateSchema = true;
+            isDuplicateSchema = false;
         }
         return isDuplicateSchema;
     }

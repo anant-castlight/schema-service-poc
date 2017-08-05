@@ -21,9 +21,9 @@ import java.util.Date;
 @Table(name = "json_manual_versioning_schema_details", uniqueConstraints = { @UniqueConstraint( columnNames = { "name", "version" } ) })
 @AuditTable(value = "json_manual_versioning_schema_details_aud")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@NamedQueries({@NamedQuery(name= JsonManualVersioningSchemaDetails.GET_ID_BY_NAME_VERSION, query = "SELECT jsd.id FROM JsonSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version"),
-        @NamedQuery(name= JsonManualVersioningSchemaDetails.GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME, query = "SELECT jsd FROM JsonSchemaDetails jsd WHERE jsd.name=:name"),
-        @NamedQuery(name= JsonManualVersioningSchemaDetails.GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION, query = "SELECT jsd FROM JsonSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version")})
+@NamedQueries({@NamedQuery(name= JsonManualVersioningSchemaDetails.GET_ID_BY_NAME_VERSION, query = "SELECT jsd.id FROM JsonManualVersioningSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version"),
+        @NamedQuery(name= JsonManualVersioningSchemaDetails.GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME, query = "SELECT jsd FROM JsonManualVersioningSchemaDetails jsd WHERE jsd.name=:name"),
+        @NamedQuery(name= JsonManualVersioningSchemaDetails.GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION, query = "SELECT jsd FROM JsonManualVersioningSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version")})
 public class JsonManualVersioningSchemaDetails {
 
     public static final String GET_ID_BY_NAME_VERSION = "getManualSchemaetailsIdByNameVersion";
