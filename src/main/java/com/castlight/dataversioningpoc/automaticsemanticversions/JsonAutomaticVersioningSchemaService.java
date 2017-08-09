@@ -1,6 +1,6 @@
-package com.castlight.dataversioning.dataversioningpoc.automaticsemanticversions;
+package com.castlight.dataversioningpoc.automaticsemanticversions;
 
-import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.JsonUtil;
+import com.castlight.dataversioningpoc.hibernateenvers.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

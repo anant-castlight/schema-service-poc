@@ -1,8 +1,7 @@
-package com.castlight.dataversioning.dataversioningpoc.automaticsemanticversions;
+package com.castlight.dataversioningpoc.automaticsemanticversions;
 
-import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.HibernateUtil;
-import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.JsonUtil;
-import com.castlight.dataversioning.dataversioningpoc.manualsemanticversions.JsonManualVersioningSchemaDetails;
+import com.castlight.dataversioningpoc.hibernateenvers.HibernateUtil;
+import com.castlight.dataversioningpoc.hibernateenvers.JsonUtil;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

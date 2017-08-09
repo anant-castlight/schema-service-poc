@@ -1,4 +1,4 @@
-package com.castlight.dataversioning.dataversioningpoc.hibernateenvers;
+package com.castlight.dataversioningpoc.hibernateenvers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +14,7 @@ public class JsonUtil {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
 
-    public static boolean isJsonSchemaChanged(String newSchema, String AlredyPresentSchema) {
+    public static boolean isJsonSchemaChanged(String AlredyPresentSchema, String newSchema) {
         JsonNode tree1 = null;
         JsonNode tree2 = null;
         try {

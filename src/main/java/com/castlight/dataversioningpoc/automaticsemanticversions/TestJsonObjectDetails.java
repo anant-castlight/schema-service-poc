@@ -1,9 +1,4 @@
-package com.castlight.dataversioning.dataversioningpoc.automaticsemanticversions;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.envers.AuditTable;
-import org.hibernate.envers.Audited;
+package com.castlight.dataversioningpoc.automaticsemanticversions;
 
 import javax.persistence.*;
 

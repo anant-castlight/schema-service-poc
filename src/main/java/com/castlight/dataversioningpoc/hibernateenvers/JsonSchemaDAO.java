@@ -1,4 +1,4 @@
-package com.castlight.dataversioning.dataversioningpoc.hibernateenvers;
+package com.castlight.dataversioningpoc.hibernateenvers;
 
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import org.hibernate.Session;

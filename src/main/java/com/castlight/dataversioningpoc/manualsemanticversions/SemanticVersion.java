@@ -1,6 +1,4 @@
-package com.castlight.dataversioning.dataversioningpoc.automaticsemanticversions;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
+package com.castlight.dataversioningpoc.manualsemanticversions;
 
 /**
  * Created by anantm on 8/4/17.

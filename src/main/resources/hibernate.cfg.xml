@@ -16,9 +16,9 @@
         <property name="hbm2ddl.auto">validate</property>
         <property name="org.hibernate.envers.do_not_audit_optimistic_locking_field">false</property>
 
-        <mapping class="com.castlight.dataversioning.dataversioningpoc.hibernateenvers.JsonSchemaDetails"/>
-        <mapping class="com.castlight.dataversioning.dataversioningpoc.manualsemanticversions.JsonManualVersioningSchemaDetails"/>
-        <mapping class="com.castlight.dataversioning.dataversioningpoc.automaticsemanticversions.TestJsonObjectDetails"/>
-        <mapping class="com.castlight.dataversioning.dataversioningpoc.automaticsemanticversions.JsonAutomaticVersioningSchemaDetails"/>
+        <mapping class="com.castlight.dataversioningpoc.manualsemanticversions.JsonSchemaDetail"/>
+        <mapping class="com.castlight.dataversioningpoc.hibernateenvers.JsonSchemaDetails"/>
+        <mapping class="com.castlight.dataversioningpoc.automaticsemanticversions.TestJsonObjectDetails"/>
+        <mapping class="com.castlight.dataversioningpoc.automaticsemanticversions.JsonAutomaticVersioningSchemaDetails"/>
     </session-factory>
 </hibernate-configuration>

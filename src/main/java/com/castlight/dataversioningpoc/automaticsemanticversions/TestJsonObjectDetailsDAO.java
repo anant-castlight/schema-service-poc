@@ -1,6 +1,6 @@
-package com.castlight.dataversioning.dataversioningpoc.automaticsemanticversions;
+package com.castlight.dataversioningpoc.automaticsemanticversions;
 
-import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.HibernateUtil;
+import com.castlight.dataversioningpoc.hibernateenvers.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 

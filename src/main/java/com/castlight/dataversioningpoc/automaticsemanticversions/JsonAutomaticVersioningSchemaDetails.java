@@ -1,6 +1,6 @@
-package com.castlight.dataversioning.dataversioningpoc.manualsemanticversions;
+package com.castlight.dataversioningpoc.automaticsemanticversions;
 
-import com.castlight.dataversioning.dataversioningpoc.hibernateenvers.JsonUtil;
+import com.castlight.dataversioningpoc.hibernateenvers.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
@@ -18,17 +18,19 @@ import java.util.Date;
 
 @Entity
 @Audited
-@Table(name = "json_manual_versioning_schema_details", uniqueConstraints = { @UniqueConstraint( columnNames = { "name", "version" } ) })
-@AuditTable(value = "json_manual_versioning_schema_details_aud")
+@Table(name = "json_automatic_versioning_schema_details", uniqueConstraints = { @UniqueConstraint( columnNames = { "name", "version" } ) })
+@AuditTable(value = "json_automatic_versioning_schema_details_aud")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@NamedQueries({@NamedQuery(name= JsonManualVersioningSchemaDetails.GET_ID_BY_NAME_VERSION, query = "SELECT jsd.id FROM JsonManualVersioningSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version"),
-        @NamedQuery(name= JsonManualVersioningSchemaDetails.GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME, query = "SELECT jsd FROM JsonManualVersioningSchemaDetails jsd WHERE jsd.name=:name"),
-        @NamedQuery(name= JsonManualVersioningSchemaDetails.GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION, query = "SELECT jsd FROM JsonManualVersioningSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version")})
-public class JsonManualVersioningSchemaDetails {
+@NamedQueries({@NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_ID_BY_NAME_VERSION, query = "SELECT jsd.id FROM JsonAutomaticVersioningSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version"),
+        @NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_LATEST_VERSION_BY_NAME, query = "SELECT jsd.version FROM JsonAutomaticVersioningSchemaDetails jsd WHERE jsd.name=:name ORDER BY jsd.id DESC"),
+        @NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME, query = "SELECT jsd FROM JsonAutomaticVersioningSchemaDetails jsd WHERE jsd.name=:name ORDER BY jsd.id DESC"),
+        @NamedQuery(name= JsonAutomaticVersioningSchemaDetails.GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION, query = "SELECT jsd FROM JsonAutomaticVersioningSchemaDetails jsd WHERE jsd.name=:name AND jsd.version=:version")})
+public class JsonAutomaticVersioningSchemaDetails {
 
-    public static final String GET_ID_BY_NAME_VERSION = "getManualSchemaetailsIdByNameVersion";
-    public static final String GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION = "getManualJsonSchemaDetailsByNameVersion";
-    public static final String GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME = "getAutomaticSchemaetailsAllJsonSchemaDetailsByName";
+    public static final String GET_ID_BY_NAME_VERSION = "getAutomaticSchemaetailsIdByNameVersion";
+    public static final String GET_JSON_SCHEMA_DETAILS_BY_NAME_VERSION = "getAutomaticJsonSchemaDetailsByNameVersion";
+    public static final String GET_ALL_JSON_SCHEMA_DETAILS_BY_NAME = "getAllAutomaticJsonSchemaDetailsByName";
+    public static final String GET_LATEST_VERSION_BY_NAME = "getAutomaticSchemaetailsLatestVersionByName";
 
     @Id
     @GeneratedValue

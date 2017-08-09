@@ -1,4 +1,4 @@
-package com.castlight.dataversioning.dataversioningpoc.hibernateenvers;
+package com.castlight.dataversioningpoc.hibernateenvers;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,8 +17,8 @@ import java.util.Date;
 
 @Entity
 @Audited
-@Table(name = "json_schema_details")
-@AuditTable(value = "json_schema_details_aud")
+@Table(name = "json_schema")
+@AuditTable(value = "json_schema_aud")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @NamedQueries({@NamedQuery(name=JsonSchemaDetails.GET_ID_BY_NAME, query = "SELECT jsd.id FROM JsonSchemaDetails jsd WHERE jsd.name=:name"),
         @NamedQuery(name=JsonSchemaDetails.GET_JSON_SCHEMA_DETAILS_BY_NAME, query = "SELECT jsd FROM JsonSchemaDetails jsd WHERE jsd.name=:name")})

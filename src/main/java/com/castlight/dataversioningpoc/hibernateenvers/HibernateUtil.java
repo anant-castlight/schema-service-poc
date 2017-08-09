@@ -1,4 +1,4 @@
-package com.castlight.dataversioning.dataversioningpoc.hibernateenvers;
+package com.castlight.dataversioningpoc.hibernateenvers;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
