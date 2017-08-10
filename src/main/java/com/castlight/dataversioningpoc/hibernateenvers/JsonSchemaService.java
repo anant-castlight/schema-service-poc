@@ -114,7 +114,7 @@ public class JsonSchemaService {
         boolean isDuplicateSchema;
         try {
             JsonSchemaDetails jsonSchemaDetails = jsonSchemaDAO.get(name);
-            isDuplicateSchema = !JsonUtil.isJsonSchemaChanged(jsonSchemaDetails.getJsonSchema(), jsonNode.toString());
+            isDuplicateSchema = !JsonUtil.isJsonSchemaChanged(jsonSchemaDetails.getJsonSchema().toString(), jsonNode.toString());
         } catch (NoResultException nre) {
             isDuplicateSchema = false;
         }

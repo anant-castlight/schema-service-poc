@@ -3,6 +3,7 @@ package com.castlight.dataversioningpoc.manualsemanticversions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonschema.core.exceptions.InvalidSchemaException;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -73,10 +74,15 @@ public class JsonSchemaDetailsController {
     public ResponseEntity getJSONSchema(@PathVariable("name_and_version") String nameAndVersion) {
 
         ResponseEntity responseEntity = null;
-        JsonSchemaDetail jsonSchemaDetail = jsonSchemaDetailsService.getJsonSchemaDetails(nameAndVersion);
-        if (jsonSchemaDetail != null) {
-            responseEntity = new ResponseEntity(jsonSchemaDetail, HttpStatus.OK);
-        } else {
+        try {
+            JsonSchemaDetail jsonSchemaDetail = jsonSchemaDetailsService.getJsonSchemaDetails(nameAndVersion);
+            if (jsonSchemaDetail != null) {
+                responseEntity = new ResponseEntity(jsonSchemaDetail, HttpStatus.OK);
+            } else {
+                responseEntity = new ResponseEntity("Schema Not Found", HttpStatus.NOT_FOUND);
+            }
+        }
+        catch (NoResultException e) {
             responseEntity = new ResponseEntity("Schema Not Found", HttpStatus.NOT_FOUND);
         }
         return responseEntity;
@@ -86,10 +92,10 @@ public class JsonSchemaDetailsController {
     public ResponseEntity getAllVersions(@PathVariable("name") String name) {
         ResponseEntity responseEntity = null;
         try {
-            List<JsonSchemaDetail> jsonSchemaDetailList = jsonSchemaDetailsService.getAllVersionsOfJsonSchema(name);
-            responseEntity = new ResponseEntity(jsonSchemaDetailList, HttpStatus.OK);
+            JsonSchemaAllVersionDetail jsonSchemaAllVersionDetail = jsonSchemaDetailsService.getAllVersionsOfJsonSchema(name);
+            responseEntity = new ResponseEntity(jsonSchemaAllVersionDetail, HttpStatus.OK);
         } catch (NoResultException nre) {
-            responseEntity = new ResponseEntity(nre.getMessage(), HttpStatus.NOT_FOUND);
+            responseEntity = new ResponseEntity("Schema Not Found", HttpStatus.NOT_FOUND);
         }
         return responseEntity;
     }

@@ -1,6 +1,5 @@
 package com.castlight.dataversioningpoc.manualsemanticversions;
 
-import com.castlight.dataversioningpoc.hibernateenvers.JsonUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,14 +54,18 @@ public class JsonSchemaDetailsService {
                 jsonSchemaDetail = jsonSchemaDetailList.get(0);
             }
             else {
-                throw new NoResultException("Requested schema not found");
+                throw new NoResultException();
             }
         }
         return jsonSchemaDetail;
     }
 
-    public List<JsonSchemaDetail> getAllVersionsOfJsonSchema(String name) {
-        return jsonSchemaDetailsRepository.findAllJsonSchemaDetailsByName(name);
+    public JsonSchemaAllVersionDetail getAllVersionsOfJsonSchema(String name) throws NoResultException{
+        List<JsonSchemaDetail> jsonSchemaDetails = jsonSchemaDetailsRepository.findAllJsonSchemaDetailsByName(name);
+        if(jsonSchemaDetails == null || jsonSchemaDetails.size() == 0) {
+            throw new NoResultException();
+        }
+        return new JsonSchemaAllVersionDetail(jsonSchemaDetails);
     }
 
     private boolean isDuplicateSchemaDetailsPresent(String name, String version, JsonNode jsonNode) throws IOException, ProcessingException {
@@ -70,7 +73,7 @@ public class JsonSchemaDetailsService {
 
         JsonSchemaDetail jsonSchemaDetail = jsonSchemaDetailsRepository.findJsonSchemaDetailsByNameAndVersion(name, version);
         if(jsonSchemaDetail != null){
-            isDuplicateSchema = !JsonUtil.isJsonSchemaChanged(jsonSchemaDetail.getJsonSchema(), jsonNode.toString());
+            isDuplicateSchema = !JsonUtil.isJsonSchemaChanged(jsonSchemaDetail.getJsonSchema(), jsonNode);
         } else {
             isDuplicateSchema = false;
         }
@@ -80,10 +83,10 @@ public class JsonSchemaDetailsService {
     private String generateSemanticVersion(ChangeType changeType, String latestVersionFromDb) throws Exception {
 
         SemanticVersion semanticVersion = new SemanticVersion(latestVersionFromDb);
-        if(ChangeType.PATCH == changeType) {
+        if(ChangeType.PATCH == changeType && !isNewVersion(semanticVersion)) {
             semanticVersion.setPatchVersion(semanticVersion.getPatchVersion()+1);
         }
-        else if(ChangeType.MINOR == changeType) {
+        else if(ChangeType.MINOR == changeType && !isNewVersion(semanticVersion)) {
             semanticVersion.setMinorVersion(semanticVersion.getMinorVersion()+1);
             semanticVersion.setPatchVersion(0);
         }
