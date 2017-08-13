@@ -14,13 +14,19 @@ import java.util.List;
 @Repository
 public interface JsonSchemaDetailsRepository extends CrudRepository<JsonSchemaDetail, Long> {
 
-    @Query("SELECT jsd.version FROM JsonSchemaDetail jsd WHERE jsd.name=:name ORDER BY jsd.id DESC")
+    @Query("SELECT jsd.version FROM JsonSchemaDetail jsd WHERE jsd.name=:name ORDER BY INET_ATON(SUBSTRING_INDEX(CONCAT(jsd.version,'0.0.0'),'.',3)) DESC")
     List<String> findLatestVersionByName(@Param("name") String name, Pageable limit);
 
-    @Query("SELECT jsd FROM JsonSchemaDetail jsd WHERE jsd.name=:name")
+    @Query("SELECT jsd.version FROM JsonSchemaDetail jsd WHERE jsd.name=:name AND jsd.version LIKE CONCAT(:majorVersion,'%') ORDER BY INET_ATON(SUBSTRING_INDEX(CONCAT(jsd.version,'0.0.0'),'.',3)) DESC")
+    List<String> findLatestVersionForGivenMajorVersionByName(@Param("name") String name, @Param("majorVersion") String majorVersion, Pageable limit);
+
+    @Query("SELECT jsd.version FROM JsonSchemaDetail jsd WHERE jsd.name=:name AND jsd.version LIKE CONCAT(:majorVersion,'.',:minorVersion,'%') ORDER BY INET_ATON(SUBSTRING_INDEX(CONCAT(jsd.version,'0.0.0'),'.',3)) DESC")
+    List<String> findLatestVersionForGivenMajorAndMinorVersionByName(@Param("name") String name, @Param("majorVersion") String majorVersion, @Param("minorVersion") String minorVersion, Pageable limit);
+
+    @Query("SELECT jsd FROM JsonSchemaDetail jsd WHERE jsd.name=:name  ORDER BY INET_ATON(SUBSTRING_INDEX(CONCAT(jsd.version,'0.0.0'),'.',3)) DESC")
     List<JsonSchemaDetail> findAllJsonSchemaDetailsByName(@Param("name") String name);
 
-    @Query("SELECT jsd FROM JsonSchemaDetail jsd WHERE jsd.name=:name ORDER BY jsd.id DESC")
+    @Query("SELECT jsd FROM JsonSchemaDetail jsd WHERE jsd.name=:name ORDER BY INET_ATON(SUBSTRING_INDEX(CONCAT(jsd.version,'0.0.0'),'.',3)) DESC")
     List<JsonSchemaDetail> findLatestSchemaDetailsByName(@Param("name") String name, Pageable limit);
 
     @Query("SELECT jsd FROM JsonSchemaDetail jsd WHERE jsd.name=:name AND jsd.version=:version")

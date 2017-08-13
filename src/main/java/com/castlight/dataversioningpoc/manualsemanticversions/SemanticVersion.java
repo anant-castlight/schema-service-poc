@@ -13,10 +13,15 @@ public class SemanticVersion {
 
     }
 
-    public SemanticVersion(String version) {
-        this.majorVersion = Integer.parseInt(version.split("\\.")[0]);
-        this.minorVersion = Integer.parseInt(version.split("\\.")[1]);
-        this.patchVersion = Integer.parseInt(version.split("\\.")[2]);
+    public SemanticVersion(String version) throws Exception {
+        try {
+            this.majorVersion = Integer.parseInt(version.split("\\.")[0]);
+            this.minorVersion = Integer.parseInt(version.split("\\.")[1]);
+            this.patchVersion = Integer.parseInt(version.split("\\.")[2]);
+        }
+        catch (Exception e){
+            throw new Exception("Invalid Schema Version");
+        }
 
     }
 

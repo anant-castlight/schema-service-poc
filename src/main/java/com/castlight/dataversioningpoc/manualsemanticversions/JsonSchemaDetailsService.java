@@ -2,6 +2,7 @@ package com.castlight.dataversioningpoc.manualsemanticversions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
+import javassist.tools.web.BadHttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -40,15 +41,41 @@ public class JsonSchemaDetailsService {
         return latestVersionFromDb;
     }
 
-    public JsonSchemaDetail getJsonSchemaDetails(String nameAndVersion) throws NoResultException {
-        JsonSchemaDetail jsonSchemaDetail;
-        if(isVersionPresent(nameAndVersion)) {
-            String name = nameAndVersion.substring(0,nameAndVersion.lastIndexOf("-"));
-            String version = nameAndVersion.substring(nameAndVersion.lastIndexOf("-")+1);
-            jsonSchemaDetail = jsonSchemaDetailsRepository.findJsonSchemaDetailsByNameAndVersion(name, version);
+    @Transactional
+    public String updateOlderVersionJsonSchemaDetails(String name, String version, String description, JsonNode jsonSchema, ChangeType changeType) throws Exception {
+
+        SemanticVersion semanticVersion = new SemanticVersion(version);
+        List<String> versionList = null;
+        String majorVersion = String.valueOf(semanticVersion.getMajorVersion());
+        String minorVersion = String.valueOf(semanticVersion.getMinorVersion());
+        if(ChangeType.PATCH == changeType) {
+            versionList = jsonSchemaDetailsRepository.findLatestVersionForGivenMajorAndMinorVersionByName(name, majorVersion, minorVersion, new PageRequest(0,1));
+        }
+        else if(ChangeType.MINOR == changeType) {
+            versionList = jsonSchemaDetailsRepository.findLatestVersionForGivenMajorVersionByName(name, majorVersion, new PageRequest(0,1));
+        }
+        else {
+            versionList = jsonSchemaDetailsRepository.findLatestVersionByName(name, new PageRequest(0,1));
+        }
+        String latestVersionFromDb = null;
+        if(versionList != null && versionList.size() != 0){
+            latestVersionFromDb = versionList.get(0);
         }
         else{
-            String name =nameAndVersion;
+            throw new NoResultException("Requested schema not found");
+        }
+        description = generateDescriptionAutomatically(description, new SemanticVersion(latestVersionFromDb));
+        if(!isDuplicateSchemaDetailsPresent(name, latestVersionFromDb, jsonSchema)) {
+            String newVersion = generateSemanticVersion(changeType, latestVersionFromDb);
+            JsonSchemaDetail JsonSchemaDetail = new JsonSchemaDetail(name, description, jsonSchema.toString(), newVersion);
+            jsonSchemaDetailsRepository.save(JsonSchemaDetail);
+            latestVersionFromDb = newVersion;
+        }
+        return latestVersionFromDb;
+    }
+
+    public JsonSchemaDetail getLatestJsonSchemaDetails(String name) throws NoResultException {
+        JsonSchemaDetail jsonSchemaDetail;
             List<JsonSchemaDetail> jsonSchemaDetailList = jsonSchemaDetailsRepository.findLatestSchemaDetailsByName(name, new PageRequest(0,1));
             if(jsonSchemaDetailList != null && jsonSchemaDetailList.size() != 0) {
                 jsonSchemaDetail = jsonSchemaDetailList.get(0);
@@ -56,8 +83,12 @@ public class JsonSchemaDetailsService {
             else {
                 throw new NoResultException("Requested schema not found");
             }
-        }
         return jsonSchemaDetail;
+    }
+
+
+    public JsonSchemaDetail getJsonSchemaDetails(String name, String version) throws NoResultException {
+        return jsonSchemaDetailsRepository.findJsonSchemaDetailsByNameAndVersion(name, version);
     }
 
     public JsonSchemaAllVersionDetail getAllVersionsOfJsonSchema(String name) throws NoResultException{

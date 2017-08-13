@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonschema.core.exceptions.InvalidSchemaException;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
+import javassist.tools.web.BadHttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,9 +40,6 @@ public class JsonSchemaDetailsController {
             String latestVersionFromDb = jsonSchemaDetailsService.saveJsonSchemaDetails(name,description,jsonSchema,changeType);
             responseEntity = new ResponseEntity("Version "+latestVersionFromDb+" of "+name+" has been created", HttpStatus.CREATED);
         }
-        catch(InvalidSchemaException e) {
-            responseEntity = new ResponseEntity(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
-        }
         catch (JsonProcessingException | ProcessingException pe) {
             responseEntity = new ResponseEntity(pe.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
@@ -51,8 +49,9 @@ public class JsonSchemaDetailsController {
         return responseEntity;
     }
 
-    /*@RequestMapping(value = "/{name_and_version:.*}", method = RequestMethod.PUT)
-    public ResponseEntity updateJSONSchema(@PathVariable("name_and_version") String nameAndVersion,
+    @RequestMapping(value = "/{name}/versions/{version:.*}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity updateJSONSchema(@PathVariable("name") String name,
+                                           @PathVariable("version") String version,
                                            @RequestBody String requestJson) {
 
         ResponseEntity responseEntity = null;
@@ -60,26 +59,27 @@ public class JsonSchemaDetailsController {
             JsonNode node = mapper.readTree(requestJson);
             JsonNode jsonSchema = mapper.convertValue(node.get("jsonSchema"), JsonNode.class);
             String description = mapper.convertValue(node.get("description"), String.class);
-            jsonSchemaDAO.update(nameAndVersion.split("-")[0], jsonSchema.toString(), description, nameAndVersion.split("-")[1]);
-            responseEntity = new ResponseEntity(null, HttpStatus.OK);
+            ChangeType changeType = mapper.convertValue(node.get("changeType"), ChangeType.class);
+            String latestVersionFromDb = jsonSchemaDetailsService.updateOlderVersionJsonSchemaDetails(name, version, description, jsonSchema, changeType);
+            responseEntity = new ResponseEntity("Updated Version "+latestVersionFromDb+" of "+name+" has been created", HttpStatus.CREATED);
         } catch (NoResultException nre) {
             responseEntity = new ResponseEntity(nre.getMessage(), HttpStatus.NOT_FOUND);
         } catch (JsonProcessingException | ProcessingException pe) {
             responseEntity = new ResponseEntity(pe.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        catch (IOException ioe) {
+        catch (Exception ioe) {
             responseEntity = new ResponseEntity(ioe.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return responseEntity;
 
-    }*/
+    }
 
-    @RequestMapping(value = "/{name_and_version:.*}", method = RequestMethod.GET)
-    public ResponseEntity getJSONSchema(@PathVariable("name_and_version") String nameAndVersion) {
+    @RequestMapping(value = "/{name}", method = RequestMethod.GET)
+    public ResponseEntity getLatestJSONSchema(@PathVariable("name") String name) {
 
         ResponseEntity responseEntity = null;
         try {
-            JsonSchemaDetail jsonSchemaDetail = jsonSchemaDetailsService.getJsonSchemaDetails(nameAndVersion);
+            JsonSchemaDetail jsonSchemaDetail = jsonSchemaDetailsService.getLatestJsonSchemaDetails(name);
             if (jsonSchemaDetail != null) {
                 responseEntity = new ResponseEntity(jsonSchemaDetail, HttpStatus.OK);
             } else {
@@ -92,6 +92,25 @@ public class JsonSchemaDetailsController {
         return responseEntity;
     }
 
+    @RequestMapping(value = "/{name}/versions/{version:.*}", method = RequestMethod.GET)
+    public ResponseEntity getJSONSchema(@PathVariable("name") String name,
+                                        @PathVariable("version") String version) {
+
+        ResponseEntity responseEntity = null;
+        try {
+            JsonSchemaDetail jsonSchemaDetail = jsonSchemaDetailsService.getJsonSchemaDetails(name, version);
+            if (jsonSchemaDetail != null) {
+                responseEntity = new ResponseEntity(jsonSchemaDetail, HttpStatus.OK);
+            } else {
+                responseEntity = new ResponseEntity("Requested schema Not Found", HttpStatus.NOT_FOUND);
+            }
+        }
+        catch (NoResultException e) {
+            responseEntity = new ResponseEntity("Requested schema Not Found", HttpStatus.NOT_FOUND);
+        }
+        return responseEntity;
+    }
+
     @RequestMapping(value = "/{name}/versions", method = RequestMethod.GET)
     public ResponseEntity getAllVersions(@PathVariable("name") String name) {
         ResponseEntity responseEntity = null;
@@ -99,22 +118,9 @@ public class JsonSchemaDetailsController {
             JsonSchemaAllVersionDetail jsonSchemaAllVersionDetail = jsonSchemaDetailsService.getAllVersionsOfJsonSchema(name);
             responseEntity = new ResponseEntity(jsonSchemaAllVersionDetail, HttpStatus.OK);
         } catch (NoResultException nre) {
-            responseEntity = new ResponseEntity("Schema Not Found", HttpStatus.NOT_FOUND);
+            responseEntity = new ResponseEntity("Requested schema Not Found", HttpStatus.NOT_FOUND);
         }
         return responseEntity;
     }
-
-    /*@RequestMapping(value = "/{name_and_version:.*}/changes", method = RequestMethod.GET)
-    public ResponseEntity getAllModificationsOnVersion(@PathVariable("name_and_version") String nameAndVersion) {
-        ResponseEntity responseEntity = null;
-        List<JsonSchemaDetail> jsonSchemaDetailsList = null;
-        try {
-            jsonSchemaDetailsList = jsonSchemaDAO.getAllModificationsOnVersion(nameAndVersion.split("-")[0], nameAndVersion.split("-")[1]);
-            responseEntity = new ResponseEntity(jsonSchemaDetailsList, HttpStatus.OK);
-        } catch (NoResultException nre) {
-            responseEntity = new ResponseEntity(nre.getMessage(), HttpStatus.NOT_FOUND);
-        }
-        return responseEntity;
-    }*/
 
 }
