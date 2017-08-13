@@ -7,6 +7,7 @@ import com.github.fge.jsonschema.core.exceptions.InvalidSchemaException;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class JsonSchemaDetailsController {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    @RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity saveJSONSchema(@RequestBody String requestJson) {
         ResponseEntity responseEntity = null;
         try {
@@ -37,6 +38,9 @@ public class JsonSchemaDetailsController {
             ChangeType changeType = mapper.convertValue(node.get("changeType"), ChangeType.class);
             String latestVersionFromDb = jsonSchemaDetailsService.saveJsonSchemaDetails(name,description,jsonSchema,changeType);
             responseEntity = new ResponseEntity("Version "+latestVersionFromDb+" of "+name+" has been created", HttpStatus.CREATED);
+        }
+        catch(InvalidSchemaException e) {
+            responseEntity = new ResponseEntity(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
         catch (JsonProcessingException | ProcessingException pe) {
             responseEntity = new ResponseEntity(pe.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);

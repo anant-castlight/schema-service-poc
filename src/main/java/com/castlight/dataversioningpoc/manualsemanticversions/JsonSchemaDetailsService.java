@@ -54,7 +54,7 @@ public class JsonSchemaDetailsService {
                 jsonSchemaDetail = jsonSchemaDetailList.get(0);
             }
             else {
-                throw new NoResultException();
+                throw new NoResultException("Requested schema not found");
             }
         }
         return jsonSchemaDetail;
@@ -90,7 +90,7 @@ public class JsonSchemaDetailsService {
             semanticVersion.setMinorVersion(semanticVersion.getMinorVersion()+1);
             semanticVersion.setPatchVersion(0);
         }
-        else if((changeType == null && isNewVersion(semanticVersion))
+        else if(isNewVersion(semanticVersion)
                 || ChangeType.MAJOR == changeType) {
             semanticVersion.setMajorVersion(semanticVersion.getMajorVersion()+1);
             semanticVersion.setMinorVersion(0);
