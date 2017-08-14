@@ -28,16 +28,16 @@ public class JsonSchemaDetailsController {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity saveJSONSchema(@RequestBody String requestJson) {
+    @RequestMapping(value = "/{name}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity saveJSONSchema(@PathVariable("name") String name,
+                                         @RequestBody String requestJson) {
         ResponseEntity responseEntity = null;
         try {
             JsonNode node = mapper.readTree(requestJson);
-            String name = mapper.convertValue(node.get("name"), String.class);
             JsonNode jsonSchema = mapper.convertValue(node.get("jsonSchema"), JsonNode.class);
             String description = mapper.convertValue(node.get("description"), String.class);
             ChangeType changeType = mapper.convertValue(node.get("changeType"), ChangeType.class);
-            String latestVersionFromDb = jsonSchemaDetailsService.saveJsonSchemaDetails(name,description,jsonSchema,changeType);
+            String latestVersionFromDb = jsonSchemaDetailsService.createJsonSchemaDetails(name,description,jsonSchema,changeType);
             responseEntity = new ResponseEntity("Version "+latestVersionFromDb+" of "+name+" has been created", HttpStatus.CREATED);
         }
         catch (JsonProcessingException | ProcessingException pe) {

@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by anantm on 8/9/17.
@@ -22,7 +24,7 @@ public class JsonSchemaDetailsService {
     private JsonSchemaDetailsRepository jsonSchemaDetailsRepository;
 
     @Transactional
-    public String saveJsonSchemaDetails(String name, String description, JsonNode jsonSchema, ChangeType changeType) throws Exception {
+    public String createJsonSchemaDetails(String name, String description, JsonNode jsonSchema, ChangeType changeType) throws Exception {
         List<String> versionList = jsonSchemaDetailsRepository.findLatestVersionByName(name, new PageRequest(0,1));
         String latestVersionFromDb = null;
         if(versionList != null && versionList.size() != 0){
@@ -31,20 +33,19 @@ public class JsonSchemaDetailsService {
         else{
             latestVersionFromDb = new SemanticVersion().toString();
         }
-        description = generateDescriptionAutomatically(description, new SemanticVersion(latestVersionFromDb));
-        if(!isDuplicateSchemaDetailsPresent(name, latestVersionFromDb, jsonSchema)) {
-            String newVersion = generateSemanticVersion(changeType, latestVersionFromDb);
-            JsonSchemaDetail JsonSchemaDetail = new JsonSchemaDetail(name, description, jsonSchema.toString(), newVersion);
-            jsonSchemaDetailsRepository.save(JsonSchemaDetail);
-            latestVersionFromDb = newVersion;
-        }
-        return latestVersionFromDb;
+        return saveJsonSchemaDetails(name, latestVersionFromDb, jsonSchema, changeType, description);
     }
 
     @Transactional
     public String updateOlderVersionJsonSchemaDetails(String name, String version, String description, JsonNode jsonSchema, ChangeType changeType) throws Exception {
 
         SemanticVersion semanticVersion = new SemanticVersion(version);
+        if(getSchemaDetailsByNameAndVersion(name, version) == null) {
+            throw new NoResultException("Requested schema not found");
+        }
+        if(isDuplicateSchemaDetailsPresent(name, version, jsonSchema)) {
+            return version;
+        }
         List<String> versionList = null;
         String majorVersion = String.valueOf(semanticVersion.getMajorVersion());
         String minorVersion = String.valueOf(semanticVersion.getMinorVersion());
@@ -54,9 +55,13 @@ public class JsonSchemaDetailsService {
         else if(ChangeType.MINOR == changeType) {
             versionList = jsonSchemaDetailsRepository.findLatestVersionForGivenMajorVersionByName(name, majorVersion, new PageRequest(0,1));
         }
-        else {
+        else if(ChangeType.MAJOR == changeType) {
             versionList = jsonSchemaDetailsRepository.findLatestVersionByName(name, new PageRequest(0,1));
         }
+        else {
+            throw new Exception("changeType as Major,Minor or Patch is required to update version");
+        }
+
         String latestVersionFromDb = null;
         if(versionList != null && versionList.size() != 0){
             latestVersionFromDb = versionList.get(0);
@@ -64,7 +69,12 @@ public class JsonSchemaDetailsService {
         else{
             throw new NoResultException("Requested schema not found");
         }
-        description = generateDescriptionAutomatically(description, new SemanticVersion(latestVersionFromDb));
+        return saveJsonSchemaDetails(name, latestVersionFromDb, jsonSchema, changeType, description);
+    }
+
+    private String saveJsonSchemaDetails(String name, String latestVersionFromDb, JsonNode jsonSchema,
+                                         ChangeType changeType, String description) throws Exception {
+        description = generateDescriptionAutomaticallyIfAbsent(description, new SemanticVersion(latestVersionFromDb));
         if(!isDuplicateSchemaDetailsPresent(name, latestVersionFromDb, jsonSchema)) {
             String newVersion = generateSemanticVersion(changeType, latestVersionFromDb);
             JsonSchemaDetail JsonSchemaDetail = new JsonSchemaDetail(name, description, jsonSchema.toString(), newVersion);
@@ -102,13 +112,17 @@ public class JsonSchemaDetailsService {
     private boolean isDuplicateSchemaDetailsPresent(String name, String version, JsonNode jsonNode) throws IOException, ProcessingException {
         boolean isDuplicateSchema;
 
-        JsonSchemaDetail jsonSchemaDetail = jsonSchemaDetailsRepository.findJsonSchemaDetailsByNameAndVersion(name, version);
+        JsonSchemaDetail jsonSchemaDetail = getSchemaDetailsByNameAndVersion(name, version);
         if(jsonSchemaDetail != null){
             isDuplicateSchema = !JsonUtil.isJsonSchemaChanged(jsonSchemaDetail.getJsonSchema(), jsonNode);
         } else {
             isDuplicateSchema = false;
         }
         return isDuplicateSchema;
+    }
+
+    private JsonSchemaDetail getSchemaDetailsByNameAndVersion(String name, String version) {
+        return jsonSchemaDetailsRepository.findJsonSchemaDetailsByNameAndVersion(name, version);
     }
 
     private String generateSemanticVersion(ChangeType changeType, String latestVersionFromDb) throws Exception {
@@ -133,7 +147,7 @@ public class JsonSchemaDetailsService {
         return semanticVersion.toString();
     }
 
-    private String generateDescriptionAutomatically(String description, SemanticVersion semanticVersion) {
+    private String generateDescriptionAutomaticallyIfAbsent(String description, SemanticVersion semanticVersion) {
 
         if(description == null) {
             if(semanticVersion.getMajorVersion() == 0 && semanticVersion.getMinorVersion() == 0
